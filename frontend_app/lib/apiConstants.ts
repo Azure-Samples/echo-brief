@@ -1,6 +1,11 @@
-export const BASE_NAME = "BASE_NAME";
+export const BASE_NAME = "ai-transcription-service";
 export const BASE_URL = `https://${BASE_NAME}.azurewebsites.net`;
 export const REGISTER_API = `${BASE_URL}/register`;
 export const UPLOAD_API = `${BASE_URL}/upload`;
 export const JOBS_API = `${BASE_URL}/jobs`;
 export const LOGIN_API = `${BASE_URL}/login`;
+export const PROMPTS_API = `${BASE_URL}/retrieve_prompts`;
+export const CREATE_PROMPT_API = `${BASE_URL}/create_prompt`;
+export const DELETE_PROMPT_API = `${BASE_URL}/delete_prompt`;
+export const DELETE_CATEGORY_API = `${BASE_URL}/delete_category`;
+export const DELETE_SUBCATEGORY_API = `${BASE_URL}/delete_subcategory`;

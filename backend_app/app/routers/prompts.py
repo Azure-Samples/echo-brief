@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 import logging
@@ -30,6 +30,13 @@ class Category(BaseModel):
 from fastapi import HTTPException, Depends
 from datetime import datetime, timezone
 from typing import Dict, Any
+
+
+class DeletePromptRequest(BaseModel):
+    category_id: str
+    subcategory_id: str
+    prompt_key: str
+
 
 
 @router.post("/create_prompt")
@@ -195,4 +202,245 @@ async def retrieve_prompts(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to retrieve prompts: {str(e)}",
+        )
+
+
+@router.delete("/delete_prompt")
+async def delete_prompt(
+    request: DeletePromptRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """Delete a prompt from a subcategory"""
+    try:
+        config = AppConfig()
+        try:
+            cosmos_db = CosmosDB(config)
+            logger.debug("CosmosDB client initialized for delete prompt")
+        except DatabaseError as e:
+            logger.error(f"Database initialization failed: {str(e)}")
+            return {"status": 503, "message": "Database service unavailable"}
+
+        # Get the category
+        category_query = {
+            "query": "SELECT * FROM c WHERE c.type = 'prompt_category' AND c.id = @id",
+            "parameters": [{"name": "@id", "value": request.category_id}],
+        }
+        categories = list(
+            cosmos_db.prompts_container.query_items(
+                query=category_query["query"],
+                parameters=category_query["parameters"],
+                enable_cross_partition_query=True,
+            )
+        )
+
+        if not categories:
+            return {
+                "status": 404,
+                "message": f"Category with ID {request.category_id} not found",
+            }
+
+        # Get the subcategory
+        subcategory_query = {
+            "query": "SELECT * FROM c WHERE c.type = 'prompt_subcategory' AND c.id = @id AND c.category_id = @category_id",
+            "parameters": [
+                {"name": "@id", "value": request.subcategory_id},
+                {"name": "@category_id", "value": request.category_id},
+            ],
+        }
+        subcategories = list(
+            cosmos_db.prompts_container.query_items(
+                query=subcategory_query["query"],
+                parameters=subcategory_query["parameters"],
+                enable_cross_partition_query=True,
+            )
+        )
+
+        if not subcategories:
+            return {
+                "status": 404,
+                "message": f"Subcategory with ID {request.subcategory_id} not found",
+            }
+
+        subcategory = subcategories[0]
+
+        # Check if the prompt exists
+        if request.prompt_key not in subcategory.get("prompts", {}):
+            return {
+                "status": 404,
+                "message": f"Prompt with key '{request.prompt_key}' not found",
+            }
+
+        # Remove the prompt
+        subcategory_prompts = subcategory.get("prompts", {})
+        del subcategory_prompts[request.prompt_key]
+
+        # Update the subcategory
+        subcategory["prompts"] = subcategory_prompts
+        subcategory["updated_at"] = int(datetime.now(timezone.utc).timestamp() * 1000)
+        
+        cosmos_db.prompts_container.upsert_item(subcategory)
+
+        return {
+            "status": 200,
+            "message": f"Prompt '{request.prompt_key}' deleted successfully",
+            "category_id": request.category_id,
+            "subcategory_id": request.subcategory_id,
+        }
+
+    except Exception as e:
+        logger.error(f"Error deleting prompt: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete prompt: {str(e)}",
+        )
+    
+@router.delete("/delete_category")
+async def delete_category(
+    category_id: str = Query(..., description="ID of the category to delete"),
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """Delete a category and all its subcategories"""
+    try:
+        config = AppConfig()
+        try:
+            cosmos_db = CosmosDB(config)
+            logger.debug(f"CosmosDB client initialized for deleting category {category_id}")
+        except DatabaseError as e:
+            logger.error(f"Database initialization failed: {str(e)}")
+            return {"status": 503, "message": "Database service unavailable"}
+
+        # Check if the category exists
+        category_query = {
+            "query": "SELECT * FROM c WHERE c.type = 'prompt_category' AND c.id = @id",
+            "parameters": [{"name": "@id", "value": category_id}],
+        }
+        categories = list(
+            cosmos_db.prompts_container.query_items(
+                query=category_query["query"],
+                parameters=category_query["parameters"],
+                enable_cross_partition_query=True,
+            )
+        )
+
+        if not categories:
+            return {
+                "status": 404,
+                "message": f"Category with ID {category_id} not found",
+            }
+
+        # Get all subcategories for this category
+        subcategory_query = {
+            "query": "SELECT * FROM c WHERE c.type = 'prompt_subcategory' AND c.category_id = @category_id",
+            "parameters": [{"name": "@category_id", "value": category_id}],
+        }
+        subcategories = list(
+            cosmos_db.prompts_container.query_items(
+                query=subcategory_query["query"],
+                parameters=subcategory_query["parameters"],
+                enable_cross_partition_query=True,
+            )
+        )
+
+        # Delete each subcategory
+        for subcategory in subcategories:
+            logger.debug(f"Deleting subcategory {subcategory['id']}")
+            cosmos_db.prompts_container.delete_item(
+                item=subcategory["id"],
+                partition_key=subcategory["id"]
+            )
+
+        # Delete the category
+        logger.debug(f"Deleting category {category_id}")
+        cosmos_db.prompts_container.delete_item(
+            item=category_id,
+            partition_key=category_id
+        )
+
+        return {
+            "status": 200,
+            "message": f"Category '{category_id}' and all subcategories deleted successfully",
+        }
+
+    except Exception as e:
+        logger.error(f"Error deleting category: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete category: {str(e)}",
+        )
+
+
+@router.delete("/delete_subcategory")
+async def delete_subcategory(
+    category_id: str = Query(..., description="ID of the parent category"),
+    subcategory_id: str = Query(..., description="ID of the subcategory to delete"),
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """Delete a subcategory and all its prompts"""
+    try:
+        config = AppConfig()
+        try:
+            cosmos_db = CosmosDB(config)
+            logger.debug(f"CosmosDB client initialized for deleting subcategory {subcategory_id}")
+        except DatabaseError as e:
+            logger.error(f"Database initialization failed: {str(e)}")
+            return {"status": 503, "message": "Database service unavailable"}
+
+        # Check if the category exists
+        category_query = {
+            "query": "SELECT * FROM c WHERE c.type = 'prompt_category' AND c.id = @id",
+            "parameters": [{"name": "@id", "value": category_id}],
+        }
+        categories = list(
+            cosmos_db.prompts_container.query_items(
+                query=category_query["query"],
+                parameters=category_query["parameters"],
+                enable_cross_partition_query=True,
+            )
+        )
+
+        if not categories:
+            return {
+                "status": 404,
+                "message": f"Category with ID {category_id} not found",
+            }
+
+        # Check if the subcategory exists
+        subcategory_query = {
+            "query": "SELECT * FROM c WHERE c.type = 'prompt_subcategory' AND c.id = @id AND c.category_id = @category_id",
+            "parameters": [
+                {"name": "@id", "value": subcategory_id},
+                {"name": "@category_id", "value": category_id},
+            ],
+        }
+        subcategories = list(
+            cosmos_db.prompts_container.query_items(
+                query=subcategory_query["query"],
+                parameters=subcategory_query["parameters"],
+                enable_cross_partition_query=True,
+            )
+        )
+
+        if not subcategories:
+            return {
+                "status": 404,
+                "message": f"Subcategory with ID {subcategory_id} not found",
+            }
+
+        # Delete the subcategory
+        logger.debug(f"Deleting subcategory {subcategory_id}")
+        cosmos_db.prompts_container.delete_item(
+            item=subcategory_id,
+            partition_key=subcategory_id
+        )
+
+        return {
+            "status": 200,
+            "message": f"Subcategory '{subcategory_id}' deleted successfully",
+        }
+
+    except Exception as e:
+        logger.error(f"Error deleting subcategory: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete subcategory: {str(e)}",
         )

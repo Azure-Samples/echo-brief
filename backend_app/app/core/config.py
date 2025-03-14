@@ -47,7 +47,7 @@ class AppConfig:
             # Initialize cosmos configuration
             self.cosmos = {
                 "endpoint": get_required_env_var("AZURE_COSMOS_ENDPOINT"),
-                "database": "VoiceDB",
+                "database": os.getenv("AZURE_COSMOS_DB", "VoiceDB"),
                 "containers": {
                     "auth": f"{prefix}auth",
                     "jobs": f"{prefix}jobs",

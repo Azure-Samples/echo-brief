@@ -1,19 +1,22 @@
 import { Button } from "@/components/ui/button"
-import { Upload } from 'lucide-react'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { Upload, ChevronRight } from 'lucide-react'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import Link from "next/link"
 
 export function AudioRecordingsHeader() {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div className="space-y-1">
         <h2 className="text-2xl font-semibold tracking-tight">Audio Recordings</h2>
-        <Breadcrumb>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+        <Breadcrumb className="flex items-center space-x-2 text-sm">
+          <BreadcrumbItem className="inline-flex items-center">
+            <BreadcrumbLink href="/" className="inline-flex items-center">Home</BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbItem>
-            <BreadcrumbPage>Audio Recordings</BreadcrumbPage>
+          <BreadcrumbSeparator className="mx-1 flex items-center">
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem className="inline-flex items-center">
+            <BreadcrumbPage className="inline-flex items-center">Prompt Management</BreadcrumbPage>
           </BreadcrumbItem>
         </Breadcrumb>
         <p className="text-sm text-muted-foreground">
