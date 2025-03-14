@@ -6,7 +6,7 @@
 # 3. Run: ./prompts.sh
 
 # Configuration
-# Replace {backend} with your backends base url (e.g., my.backend.service.azurewebsites.net)                                                                    
+# Replace {backend} with your backends base url (e.g., https://my.backend.service.azurewebsites.net)                                                                    
 API_BASE_URL="{my base url}"
 # Replace with your registered account credentials (the account you regesterd on the website)                              
 EMAIL="example@example.com"
