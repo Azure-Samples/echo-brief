@@ -59,11 +59,10 @@ resource "null_resource" "create_deploy_script" {
   }
 }
 
-resource "null_resource" "publish_website" {
-  depends_on = [null_resource.replace_base_name, time_sleep.wait_before_start_frontend, null_resource.create_deploy_script]
+resource "null_resource" "deploy_command" {
+  depends_on = [null_resource.create_deploy_script]
   triggers   = { always_run = "${timestamp()}" }
-
   provisioner "local-exec" {
-    command = "deploy.bat"
+    command = "swa deploy ./frontend_app/out --env production --deployment-token '${azurerm_static_web_app.frontend_webapp.api_key}'"
   }
 }

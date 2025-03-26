@@ -635,3 +635,6 @@ Once deployed you should get a site started successfully message.
 1. Edit the prompts.sh file downloaded as part of the repo. Fill in the details (backend url, username and password.) Right click an empty space in the folder where prompts.sh is and click “open git bash here”. Then run “./prompts.sh”.
 
 ![alt text](images/image-59.png)
+
+> [!Note]
+> Special thanks to Chris Masuda, David Willis, and Joe Broughton from Leicestershire County Council for preparing the manual deployment guidance.

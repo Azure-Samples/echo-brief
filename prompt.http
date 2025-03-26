@@ -1,0 +1,173 @@
+# Prompts API Collection
+# Replace with your actual host and port
+@host = http://localhost:8000
+
+@email = example@example.com
+@password = 123456
+
+### Authentication
+
+# Login to get Bearer token
+# @name login
+POST {{host}}/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+
+# Extract the token from the login response and use it in subsequent requests
+@token = {{login.response.body.access_token}}
+
+### Category APIs
+
+# Create a new category
+POST {{host}}/categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "General"
+}
+
+###
+
+# List all categories
+GET {{host}}/categories
+Authorization: Bearer {{token}}
+
+###
+
+# Get a specific category
+# Replace with a real category ID
+GET {{host}}/categories/category_1742479490162
+Authorization: Bearer {{token}}
+
+###
+
+# Update a category
+# Replace with a real category ID
+PUT {{host}}/categories/category_1742479490162
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Category1"
+}
+
+###
+
+# Delete a category
+# Replace with a real category ID
+DELETE {{host}}/categories/category_123456789
+Authorization: Bearer {{token}}
+
+###
+
+### Subcategory APIs
+
+# Create a subcategory
+POST {{host}}/subcategories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Greetings",
+  "category_id": "category_1742484175152",
+  "prompts": {
+    "hello": "Hello, how can I help you?"
+  }
+}
+
+###
+
+# List all subcategories
+GET {{host}}/subcategories
+Authorization: Bearer {{token}}
+
+###
+
+# List subcategories for a specific category
+# Replace with a real category ID
+GET {{host}}/subcategories?category_id=category_1742486517780
+Authorization: Bearer {{token}}
+
+###
+
+# Get a specific subcategory
+# Replace with a real subcategory ID
+GET {{host}}/subcategories/subcategory_1742486537331_Subtest2
+Authorization: Bearer {{token}}
+
+###
+
+# Update a subcategory
+# Replace with a real subcategory ID
+PUT {{host}}/subcategories/subcategory_1743006891860_Greetings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Updated Greetings",
+  "prompts": {
+    "hello": "Hi there! How may I assist?"
+  }
+}
+
+###
+
+# Delete a subcategory
+# Replace with a real subcategory ID
+DELETE {{host}}/subcategories/subcategory_1742486537331_Subtest2
+Authorization: Bearer {{token}}
+
+###
+
+### Hierarchical API
+
+# Retrieve all prompts in a hierarchical structure
+GET {{host}}/retrieve_prompts
+Authorization: Bearer {{token}}
+
+###
+
+# Raw curl commands for reference:
+
+# Create a category:
+# curl -X POST "http://localhost:8000/categories" -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_TOKEN_HERE" -d '{"name": "General"}'
+
+# List all categories:
+# curl -X GET "http://localhost:8000/categories" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Get a specific category:
+# curl -X GET "http://localhost:8000/categories/category_123456789" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Update a category:
+# curl -X PUT "http://localhost:8000/categories/category_123456789" -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_TOKEN_HERE" -d '{"name": "Updated Category Name"}'
+
+# Delete a category:
+# curl -X DELETE "http://localhost:8000/categories/category_123456789" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Create a subcategory:
+# curl -X POST "http://localhost:8000/subcategories" -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_TOKEN_HERE" -d '{"name": "Greetings", "category_id": "category_123456789", "prompts": {"hello": "Hello, how can I help you?", "goodbye": "Thank you for using our service!"}}'
+
+# List all subcategories:
+# curl -X GET "http://localhost:8000/subcategories" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# List subcategories for a specific category:
+# curl -X GET "http://localhost:8000/subcategories?category_id=category_123456789" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Get a specific subcategory:
+# curl -X GET "http://localhost:8000/subcategories/subcategory_123456789" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Update a subcategory:
+# curl -X PUT "http://localhost:8000/subcategories/subcategory_123456789" -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_TOKEN_HERE" -d '{"name": "Updated Greetings", "prompts": {"hello": "Hi there! How may I assist you today?", "goodbye": "Have a great day!"}}'
+
+# Delete a subcategory:
+# curl -X DELETE "http://localhost:8000/subcategories/subcategory_123456789" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Retrieve all prompts in a hierarchical structure:
+# curl -X GET "http://localhost:8000/retrieve_prompts" -H "Authorization: Bearer YOUR_TOKEN_HERE" 
