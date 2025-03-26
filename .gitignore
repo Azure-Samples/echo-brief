@@ -1,4 +1,5 @@
 # Backend specific
+infra/.terraform.lock.hcl
 .$ArchDesign.drawio.bkp
 /backend/.env
 /backend/.env.test
@@ -20,6 +21,7 @@ az_func_audio_processor/.serverless-state.json
 az_func_audio_processor/__pycache__
 az_func_audio_processor/.env
 # Python
+
 __pycache__/
 *.py[cod]
 *$py.class
