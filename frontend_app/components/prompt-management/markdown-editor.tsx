@@ -62,6 +62,13 @@ export function MarkdownEditor({ initialPrompts = {}, onSave, onCancel, hideActi
     setPrompts(prev => {
       const newPrompts = [...prev]
       newPrompts[index] = { ...newPrompts[index], key }
+
+      // Auto-save using the latest state
+      const promptsObject = Object.fromEntries(
+        newPrompts.filter(p => p.key.trim()).map(p => [p.key.trim(), p.value.trim()])
+      )
+      onSave(promptsObject)
+
       return newPrompts
     })
   }
@@ -71,16 +78,15 @@ export function MarkdownEditor({ initialPrompts = {}, onSave, onCancel, hideActi
     setPrompts(prev => {
       const newPrompts = [...prev]
       newPrompts[index] = { ...newPrompts[index], value: value || "" }
+
+      // Auto-save using the latest state
+      const promptsObject = Object.fromEntries(
+        newPrompts.filter(p => p.key.trim()).map(p => [p.key.trim(), p.value.trim()])
+      )
+      onSave(promptsObject)
+
       return newPrompts
     })
-
-    // Auto-save without forcing preview refresh
-    const newPrompts = [...prompts]
-    newPrompts[index] = { ...newPrompts[index], value: value || "" }
-    const promptsObject = Object.fromEntries(
-      newPrompts.filter(p => p.key.trim()).map(p => [p.key.trim(), p.value.trim()])
-    )
-    onSave(promptsObject)
   }
 
   const handleSave = () => {
@@ -136,13 +142,6 @@ export function MarkdownEditor({ initialPrompts = {}, onSave, onCancel, hideActi
                   onChange={(e) => {
                     console.log("Key input changed:", e.target.value)
                     handleKeyChange(index, e.target.value)
-                    // Auto-save when key changes
-                    const newPrompts = [...prompts]
-                    newPrompts[index] = { ...newPrompts[index], key: e.target.value }
-                    const promptsObject = Object.fromEntries(
-                      newPrompts.filter(p => p.key.trim()).map(p => [p.key.trim(), p.value.trim()])
-                    )
-                    onSave(promptsObject)
                   }}
                   placeholder="Enter prompt key (e.g., 'greeting', 'introduction')"
                 />
