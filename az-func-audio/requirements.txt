@@ -10,6 +10,6 @@ reportlab==4.2.5
 azure-functions
 azure-common==1.1.28
 azure-core==1.32.0
-azure-identity==1.15.0
+azure-identity==1.16.1
 azure-storage-blob==12.19.0
 python-dotenv==1.0.1
