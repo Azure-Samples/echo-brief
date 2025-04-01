@@ -598,11 +598,11 @@ if you get “Failure Reason: Could not load StaticSitesClient metadata from rem
 
 **tar -a -c -f ../output.zip \***
 
-1. then change directory to \echo-brief and then run this Azure CLI deployment command to deploy the Function App.
+2. then change directory to \echo-brief and then run this Azure CLI deployment command to deploy the Function App.
 
 **az functionapp deployment source config-zip --subscription <subscriptionID>  --resource-group <resourcegroupname> --name <functionappname> --src output.zip --build-remote true**
 
-2. Navigate to the Function app in the Azure Portal, on the overview page you should see the function “blob\_trigger”
+3. Navigate to the Function app in the Azure Portal, on the overview page you should see the function “blob\_trigger”
 
 ![alt text](images/image-54.png)
 
