@@ -608,12 +608,6 @@ if you get “Failure Reason: Could not load StaticSitesClient metadata from rem
 
 # Deploying the Backend App
 
-1. Open config.py in \echo-brief\backend\_app\app\core, under the section “Class AppConfig” change ‘“database”:’ to your cosmos database name. (Not the account name)
-
-![alt text](images/image-55.png)
-![alt text](images/image-56.png)
-
-
 1. Open Command prompt and change directory to \echo-brief\backend\_app and run this command to create a zip file.
 
 **tar -a -c -f ../backend.zip app requirements.txt**
