@@ -602,7 +602,7 @@ if you get “Failure Reason: Could not load StaticSitesClient metadata from rem
 
 **az functionapp deployment source config-zip --subscription <subscriptionID>  --resource-group <resourcegroupname> --name <functionappname> --src output.zip --build-remote true**
 
-1. Navigate to the Function app in the Azure Portal, on the overview page you should see the function “blob\_trigger”
+2. Navigate to the Function app in the Azure Portal, on the overview page you should see the function “blob\_trigger”
 
 ![alt text](images/image-54.png)
 
@@ -612,7 +612,7 @@ if you get “Failure Reason: Could not load StaticSitesClient metadata from rem
 
 **tar -a -c -f ../backend.zip app requirements.txt**
 
-1. change directory to \echo-brief\ and then run the following command to deploy the backend code to the web app.
+2. change directory to \echo-brief\ and then run the following command to deploy the backend code to the web app.
 
 ***az webapp deployment source config-zip --resource-group <resource-group-name> --name <web-app-name> --src backend.zip***
 
@@ -626,7 +626,7 @@ Once deployed you should get a site started successfully message.
 
 ![alt text](images/image-58.png)
 
-1. Edit the prompts.sh file downloaded as part of the repo. Fill in the details (backend url, username and password.) Right click an empty space in the folder where prompts.sh is and click “open git bash here”. Then run “./prompts.sh”.
+2. Edit the prompts.sh file downloaded as part of the repo. Fill in the details (backend url, username and password.) Right click an empty space in the folder where prompts.sh is and click “open git bash here”. Then run “./prompts.sh”.
 
 ![alt text](images/image-59.png)
 
