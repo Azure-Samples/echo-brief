@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ViewDetailsDialog } from "./view-details-dialog";
+import { useRouter } from "next/navigation";
 
 const statusEnum = z.enum(["all", "uploaded", "processing", "completed", "failed"]);
 
@@ -50,26 +51,51 @@ export function AudioRecordingsCombined({ initialFilters }: { initialFilters: Fi
   const [selectedRecording, setSelectedRecording] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hasFetchedData = useRef(false);
+  const router = useRouter();
 
   const form = useForm<FilterValues>({
     resolver: zodResolver(filterSchema),
     defaultValues: { ...initialFilters, created_at: "" },
   });
 
+  const safeGetLocalStorage = (key: string) => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.error('Error accessing localStorage:', e);
+      return null;
+    }
+  };
+
+  const safeSetLocalStorage = (key: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.error('Error setting localStorage:', e);
+    }
+  };
+
   const fetchJobData = useCallback(
     async (forceRefresh = false, filters?: FilterValues) => {
       if (!forceRefresh) {
-        const cachedJobs = localStorage.getItem("cachedJobs");
+        const cachedJobs = safeGetLocalStorage("cachedJobs");
         if (cachedJobs) {
-          setAudioRecordings(JSON.parse(cachedJobs));
-          setIsLoading(false);
-          return;
+          try {
+            setAudioRecordings(JSON.parse(cachedJobs));
+            setIsLoading(false);
+            return;
+          } catch (e) {
+            console.error('Error parsing cached jobs:', e);
+            // Continue to fetch from API
+          }
         }
       }
 
       setIsLoading(true);
       try {
-        const token = localStorage.getItem("token");
+        const token = safeGetLocalStorage("token");
         if (!token) throw new Error("No authentication token found. Please log in again.");
 
         const params = new URLSearchParams({
@@ -90,9 +116,14 @@ export function AudioRecordingsCombined({ initialFilters }: { initialFilters: Fi
 
         const data = await response.json();
         setAudioRecordings(data.jobs || []);
-        localStorage.setItem("cachedJobs", JSON.stringify(data.jobs || []));
+        safeSetLocalStorage("cachedJobs", JSON.stringify(data.jobs || []));
       } catch (error) {
         console.error("Error fetching audio recordings:", error);
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -235,7 +266,9 @@ export function AudioRecordingsCombined({ initialFilters }: { initialFilters: Fi
                 paginatedData.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>{row.id}</TableCell>
-                    <TableCell className="text-blue-500 font-medium">{row.file_name}</TableCell>
+                    <TableCell className="text-blue-500 font-medium">
+                      {row.file_name || row.file_path.split('/').pop() || 'Unnamed Recording'}
+                    </TableCell>
                     <TableCell>
                       <Badge className={cn("px-4 py-1 text-xs rounded-md min-w-[100px] flex items-center justify-center", statusVariants[row.status] || statusVariants.default)}>
                         {row.status}
@@ -254,8 +287,22 @@ export function AudioRecordingsCombined({ initialFilters }: { initialFilters: Fi
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => {
-                              setSelectedRecording(row);
-                              setIsDialogOpen(true);
+                              // For static export, we need to use one of our pre-generated paths
+                              // In a real app with SSR, you would use the actual row.id
+                              
+                              // Check if this is one of our pre-generated paths
+                              const isPlaceholder = row.id.startsWith('job_placeholder_');
+                              
+                              if (isPlaceholder) {
+                                router.push(`/audio-recordings/${row.id}`);
+                              } else {
+                                // If not a placeholder, route to the first placeholder ID but store the real ID in localStorage
+                                // for client-side fetching once the page loads
+                                if (typeof window !== 'undefined') {
+                                  localStorage.setItem('current_recording_id', row.id);
+                                }
+                                router.push(`/audio-recordings/job_placeholder_123456789`);
+                              }
                             }}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Details

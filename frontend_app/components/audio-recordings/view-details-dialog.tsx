@@ -9,8 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
+// Add the analysis_text property to extend the AudioRecording type
+interface ExtendedAudioRecording extends AudioRecording {
+  analysis_text?: string;
+}
+
 interface ViewDetailsDialogProps {
-  recording: AudioRecording;
+  recording: ExtendedAudioRecording;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -20,6 +25,7 @@ const statusStyles: Record<string, string> = {
   processing: "bg-yellow-500 text-black border border-yellow-600 shadow-md px-4 py-1 rounded-full",
   uploaded: "bg-blue-500 text-white border border-blue-700 shadow-md px-4 py-1 rounded-full",
   failed: "bg-red-500 text-white border border-red-700 shadow-md px-4 py-1 rounded-full",
+  error: "bg-red-500 text-white border border-red-700 shadow-md px-4 py-1 rounded-full",
   default: "bg-gray-500 text-white border border-gray-600 shadow-md px-4 py-1 rounded-full",
 };
 
@@ -36,14 +42,12 @@ export function ViewDetailsDialog({ recording, open, onOpenChange }: ViewDetails
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[800px] max-w-[90vw] rounded-xl shadow-lg bg-white dark:bg-gray-900 text-black dark:text-white">
-
+      <DialogContent className="w-full h-[90vh] max-w-[95vw] rounded-xl shadow-lg bg-white dark:bg-gray-900 text-black dark:text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Audio Recording Details</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[80vh] overflow-y-auto p-6">
-
           <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center">
               <FileAudio className="mr-2" /> Recording
@@ -111,8 +115,6 @@ export function ViewDetailsDialog({ recording, open, onOpenChange }: ViewDetails
             </div>
           </div>
 
-
-
           {recording.transcription_file_path && (
             <>
               <Separator className="my-4 border-gray-300 dark:border-gray-700" />
@@ -127,13 +129,17 @@ export function ViewDetailsDialog({ recording, open, onOpenChange }: ViewDetails
                 ) : (
                   <p>Loading...</p>
                 )}
-                <Button onClick={() => window.open(recording.transcription_file_path, "_blank")} variant="outline" className="w-full font-semibold rounded-lg shadow-md mt-2">
+                <Button 
+                  onClick={() => recording.transcription_file_path && window.open(recording.transcription_file_path, "_blank")} 
+                  variant="outline" 
+                  className="w-full font-semibold rounded-lg shadow-md mt-2"
+                  disabled={!recording.transcription_file_path}
+                >
                   Download Transcription TXT
                 </Button>
               </div>
             </>
           )}
-
 
           {recording.analysis_text && (
             <>
@@ -144,7 +150,7 @@ export function ViewDetailsDialog({ recording, open, onOpenChange }: ViewDetails
                   <FileText className="mr-2" /> Analysis Summary
                 </h3>
 
-                {recording.analysis_text.split("\n\n").map((section, index) => {
+                {recording.analysis_text.split("\n\n").map((section: string, index: number) => {
                   const lines = section.split("\n");
                   const title = lines[0];
                   const content = lines.slice(1);
@@ -153,7 +159,7 @@ export function ViewDetailsDialog({ recording, open, onOpenChange }: ViewDetails
                     <div key={index} className="mt-4">
                       <h4 className="text-md font-semibold">{title}</h4>
                       <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 mt-2">
-                        {content.map((point, subIndex) => (
+                        {content.map((point: string, subIndex: number) => (
                           <li key={subIndex}>{point}</li>
                         ))}
                       </ul>
@@ -162,13 +168,16 @@ export function ViewDetailsDialog({ recording, open, onOpenChange }: ViewDetails
                 })}
               </div>
 
-              <Button onClick={() => window.open(recording.analysis_file_path, "_blank")} variant="outline" className="w-full font-semibold rounded-lg shadow-md mt-2">
+              <Button 
+                onClick={() => recording.analysis_file_path && window.open(recording.analysis_file_path, "_blank")} 
+                variant="outline" 
+                className="w-full font-semibold rounded-lg shadow-md mt-2"
+                disabled={!recording.analysis_file_path}
+              >
                 Download Analysis PDF
               </Button>
             </>
           )}
-
-
         </div>
       </DialogContent>
     </Dialog>

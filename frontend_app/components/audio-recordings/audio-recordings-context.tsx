@@ -27,6 +27,7 @@ interface AudioRecordingsContextType {
   audioRecordings: AudioRecording[];
   fetchAudioRecordings: () => Promise<void>;
   error: string | null;
+  isLoading: boolean;
 }
 
 const AudioRecordingsContext = createContext<AudioRecordingsContextType | undefined>(undefined);
@@ -34,16 +35,46 @@ const AudioRecordingsContext = createContext<AudioRecordingsContextType | undefi
 export function AudioRecordingsProvider({ children }: { children: React.ReactNode }) {
   const [audioRecordings, setAudioRecordings] = useState<AudioRecording[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Helper function to safely access localStorage (not available during SSR)
+  const safeGetLocalStorage = (key: string) => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.error('Error accessing localStorage:', e);
+      return null;
+    }
+  };
+
+  // Helper function to safely set localStorage
+  const safeSetLocalStorage = (key: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.error('Error setting localStorage:', e);
+    }
+  };
 
   const fetchAudioRecordings = useCallback(async () => {
-    const cachedData = localStorage.getItem('audioRecordingsData');
+    setIsLoading(true);
+    
+    const cachedData = safeGetLocalStorage('audioRecordingsData');
     if (cachedData) {
-      setAudioRecordings(JSON.parse(cachedData));
-      return; // Exit if cached data is available
+      try {
+        setAudioRecordings(JSON.parse(cachedData));
+        setIsLoading(false);
+        return; // Exit if cached data is available
+      } catch (e) {
+        console.error('Error parsing cached data:', e);
+        // Continue to fetch from API if cache parsing fails
+      }
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = safeGetLocalStorage('token');
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
@@ -63,11 +94,19 @@ export function AudioRecordingsProvider({ children }: { children: React.ReactNod
       }
 
       const data = await response.json();
-      localStorage.setItem('audioRecordingsData', JSON.stringify(data.jobs || []));
+      safeSetLocalStorage('audioRecordingsData', JSON.stringify(data.jobs || []));
+      safeSetLocalStorage('cachedJobs', JSON.stringify(data.jobs || [])); // Also update cachedJobs for compatibility
       setAudioRecordings(data.jobs || []);
     } catch (error) {
       console.error('Error fetching audio recordings:', error);
-      setError(error.message);
+      
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -77,7 +116,7 @@ export function AudioRecordingsProvider({ children }: { children: React.ReactNod
   }, [fetchAudioRecordings]);
 
   return (
-    <AudioRecordingsContext.Provider value={{ audioRecordings, fetchAudioRecordings, error }}>
+    <AudioRecordingsContext.Provider value={{ audioRecordings, fetchAudioRecordings, error, isLoading }}>
       {children}
     </AudioRecordingsContext.Provider>
   );

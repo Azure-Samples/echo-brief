@@ -13,7 +13,11 @@ const menuItems = [
   { icon: FileText, label: 'Prompt Management', href: '/prompt-management' },
 ]
 
-export function AppSidebar({ children }: { children: React.ReactNode }) {
+interface AppSidebarProps {
+  children?: React.ReactNode;
+}
+
+export function AppSidebar({ children }: AppSidebarProps) {
   const [isOpen, setIsOpen] = useState(false) 
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)

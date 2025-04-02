@@ -1,0 +1,47 @@
+{
+  "routes": [
+    {
+      "route": "/login",
+      "rewrite": "/login/index.html"
+    },
+    {
+      "route": "/audio-recordings",
+      "rewrite": "/audio-recordings/index.html"
+    },
+    {
+      "route": "/audio-recordings/*",
+      "rewrite": "/audio-recordings/job_placeholder_123456789/index.html"
+    },
+    {
+      "route": "/audio-upload",
+      "rewrite": "/audio-upload/index.html"
+    },
+    {
+      "route": "/prompt-management",
+      "rewrite": "/prompt-management/index.html"
+    },
+    {
+      "route": "/api/*",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "rewrite": "https://YOUR_API_ENDPOINT.com/api/$1"
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/*.{png,jpg,gif,svg,css,js}",
+      "/api/*"
+    ]
+  },
+  "globalHeaders": {
+    "content-security-policy": "default-src https: 'unsafe-eval' 'unsafe-inline'; object-src 'none'",
+    "cache-control": "no-cache"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".css": "text/css",
+    ".js": "text/javascript",
+    ".html": "text/html",
+    ".ico": "image/x-icon"
+  }
+} 

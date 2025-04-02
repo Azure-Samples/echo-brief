@@ -1,0 +1,48 @@
+{
+  "routes": [
+    {
+      "route": "/login",
+      "serve": "/login/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/audio-recordings",
+      "serve": "/audio-recordings/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/audio-recordings/*",
+      "serve": "/audio-recordings/job_placeholder_123456789/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/audio-upload",
+      "serve": "/audio-upload/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/prompt-management",
+      "serve": "/prompt-management/index.html",
+      "statusCode": 200
+    },
+    {
+      "route": "/api/*",
+      "serve": "/404.html",
+      "statusCode": 404
+    }
+  ],
+  "platformErrorOverrides": [
+    {
+      "errorType": "NotFound",
+      "serve": "/404.html",
+      "statusCode": 404
+    }
+  ],
+  "defaultHeaders": {
+    "cache-control": "must-revalidate, max-age=0"
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/js/*", "/api/*"]
+  }
+} 

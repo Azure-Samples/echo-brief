@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && cp staticwebapp.config.json out/ && mkdir -p out/static && cp -r static/* out/static/ || true",
     "start": "next start",
     "lint": "next lint"
   },

@@ -55,7 +55,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
               <div className="flex flex-1">
-                <AppSidebar />
+                <AppSidebar>
+                  {/* You can add any content that should go inside the sidebar */}
+                </AppSidebar>
                 <main className="flex-1 overflow-y-auto">
                   <div className="container mx-auto p-4">
                     <div className="flex justify-end mb-4">
