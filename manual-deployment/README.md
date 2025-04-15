@@ -295,7 +295,7 @@ The next set of permissions are set using the Azure CLI, to provision resource a
 
 #### Assign Data Reader Role to Azure Cosmos DB Account
 
-1. Create the ‘Data Reader’ role on the Azure Cosmos DB Account. Use the file provided named ‘data\_reader\_role\_definition.json’.
+1. Create the ‘Data Reader’ role on the Azure Cosmos DB Account. edit the file provided named ‘data\_reader\_role\_definition.json’ to add your details, then run the command below to create.
 2. Open Command Prompt, change directory to the location of the file you have saved above, and run the following command to create the role:
 
 *az cosmosdb sql role definition create --account-name* ***<COSMOSAccount>*** *--resource-group* ***<ResourceGroup>*** *--body @data\_reader\_role\_definition.json*
@@ -309,7 +309,7 @@ The next set of permissions are set using the Azure CLI, to provision resource a
 
 #### Assign Data Contributor Role to Azure Cosmos DB Account
 
-1. Create the ‘Data Contributor role on the Azure Cosmos DB Account. Use the file provided named ‘data\_contributor\_role\_definition.json’.
+1. Create the ‘Data Contributor role on the Azure Cosmos DB Account. edit the file provided named ‘data\_contributor\_role\_definition.json’ to add your details, then run the command below to create.
 2. Using Azure CLI, change directory to the location of the file you have saved above, and create the role and run the following command:
 
 *az cosmosdb sql role definition create --account-name <COSMOSAccount> --resource-group <ResourceGroup> --body @data\_contributor\_role\_definition.json*
