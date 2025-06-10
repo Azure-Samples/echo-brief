@@ -23,6 +23,6 @@ azure-storage-blob
 httpx
 #azure-cosmos==4.8.0
 uvicorn==0.32.0
-requests==2.32.3
+requests==2.32.4
 python-dotenv==1.0.1
 python-jose[cryptography]==3.3.0
